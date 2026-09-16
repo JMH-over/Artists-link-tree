@@ -1,28 +1,52 @@
+const platformCatalog={
+ spotify:{label:'Spotify',icon:'S',placeholder:'https://open.spotify.com/...'},
+ apple:{label:'Apple Music',icon:'',placeholder:'https://music.apple.com/...'},
+ youtube:{label:'YouTube',icon:'▶',placeholder:'https://youtube.com/...'},
+ audiomack:{label:'Audiomack',icon:'A',placeholder:'https://audiomack.com/...'},
+ deezer:{label:'Deezer',icon:'D',placeholder:'https://www.deezer.com/...'},
+ pandora:{label:'Pandora',icon:'P',placeholder:'https://www.pandora.com/...'},
+ amazon:{label:'Amazon Music',icon:'AM',placeholder:'https://music.amazon.com/...'},
+ tidal:{label:'TIDAL',icon:'T',placeholder:'https://tidal.com/...'},
+ boomplay:{label:'Boomplay',icon:'B',placeholder:'https://www.boomplay.com/...'},
+ soundcloud:{label:'SoundCloud',icon:'SC',placeholder:'https://soundcloud.com/...'},
+ tiktok:{label:'TikTok',icon:'♪',placeholder:'https://tiktok.com/@...'},
+ instagram:{label:'Instagram',icon:'◎',placeholder:'https://instagram.com/...'},
+ facebook:{label:'Facebook',icon:'f',placeholder:'https://facebook.com/...'},
+ x:{label:'X',icon:'𝕏',placeholder:'https://x.com/...'},
+ website:{label:'Website',icon:'↗',placeholder:'https://yourwebsite.com/...'},
+ whatsapp:{label:'WhatsApp',icon:'WA',placeholder:'https://wa.me/...'}
+};
 const defaults={name:'Vine Jonas',bio:'Artist • Music • Culture',image:'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=240&q=85',links:{spotify:'https://open.spotify.com/',apple:'https://music.apple.com/',youtube:'https://youtube.com/',audiomack:'https://audiomack.com/',tiktok:'https://tiktok.com/',instagram:'https://instagram.com/'}};
-const labels={spotify:'Spotify',apple:'Apple Music',youtube:'YouTube',audiomack:'Audiomack',tiktok:'TikTok',instagram:'Instagram'};
-const icons={spotify:'S',apple:'',youtube:'▶',audiomack:'A',tiktok:'♪',instagram:'◎'};
 const fields=document.querySelector('#linkFields');
 const saved=localStorage.getItem('artistLinkHub');
-const data=saved?JSON.parse(saved):JSON.parse(JSON.stringify(defaults));
+const raw=saved?JSON.parse(saved):JSON.parse(JSON.stringify(defaults));
+const data={...raw,links:{...raw.links}};
 const $=s=>document.querySelector(s);
 function safeUrl(value){try{const u=new URL(value);return ['http:','https:'].includes(u.protocol)?u.href:'#'}catch{return '#'}}
 function escapeHtml(v){return String(v).replaceAll('&','&amp;').replaceAll('"','&quot;').replaceAll('<','&lt;').replaceAll('>','&gt;')}
 function makeSlug(name){return (name||'artist').toLowerCase().trim().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')||'artist'}
 function toast(msg){const t=$('#toast');t.textContent=msg;t.classList.add('show');clearTimeout(window.toastTimer);window.toastTimer=setTimeout(()=>t.classList.remove('show'),1800)}
+function getLinkEntries(){return Object.entries(data.links).filter(([,url])=>url)}
 function render(){
  $('#artistName').textContent=data.name; $('#artistBio').textContent=data.bio;
  $('#profileImage').src=safeUrl(data.image)||defaults.image; $('#avatarPreview').src=safeUrl(data.image)||defaults.image;
- $('#linksContainer').innerHTML=Object.entries(data.links).filter(([,url])=>url).map(([key,url],i)=>`<a class="link-card" style="animation-delay:${i*.07}s" href="${safeUrl(url)}" target="_blank" rel="noopener noreferrer"><span class="link-icon">${icons[key]}</span><span class="link-label">${labels[key]}</span><span class="arrow">↗</span></a>`).join('');
- $('#socialRow').innerHTML=Object.entries(data.links).filter(([key,url])=>['tiktok','instagram','youtube'].includes(key)&&url).map(([key,url])=>`<a href="${safeUrl(url)}" target="_blank" rel="noopener noreferrer" aria-label="${labels[key]}">${icons[key]}</a>`).join('');
- fields.innerHTML=Object.entries(labels).map(([key,label])=>`<div class="link-field"><small>${label}</small><input data-link="${key}" type="url" value="${escapeHtml(data.links[key]||'')}" placeholder="https://..."></div>`).join('');
+ $('#linksContainer').innerHTML=getLinkEntries().map(([key,url],i)=>{const p=platformCatalog[key]||{label:key,icon:'↗'};return `<a class="link-card" style="animation-delay:${i*.07}s" href="${safeUrl(url)}" target="_blank" rel="noopener noreferrer"><span class="link-icon">${escapeHtml(p.icon)}</span><span class="link-label">${escapeHtml(p.label)}</span><span class="arrow">↗</span></a>`}).join('');
+ $('#socialRow').innerHTML=getLinkEntries().filter(([key])=>['tiktok','instagram','youtube','facebook','x'].includes(key)).map(([key,url])=>{const p=platformCatalog[key];return `<a href="${safeUrl(url)}" target="_blank" rel="noopener noreferrer" aria-label="${p.label}">${escapeHtml(p.icon)}</a>`}).join('');
+ renderLinkFields();
  $('#nameInput').value=data.name; $('#bioInput').value=data.bio; $('#pageSlug').textContent=makeSlug(data.name);
  addCardEffects();
 }
+function renderLinkFields(){
+ fields.innerHTML=getLinkEntries().map(([key,url],index)=>{const p=platformCatalog[key]||{label:key,icon:'↗',placeholder:'https://...'};return `<div class="link-field"><div class="link-field-head"><small>${escapeHtml(p.label)}</small><button type="button" class="remove-link" data-index="${index}" aria-label="Remove ${escapeHtml(p.label)}">Remove</button></div><select data-platform-index="${index}">${Object.entries(platformCatalog).map(([id,item])=>`<option value="${id}" ${id===key?'selected':''}>${escapeHtml(item.label)}</option>`).join('')}</select><input data-link-index="${index}" type="url" value="${escapeHtml(url)}" placeholder="${escapeHtml(p.placeholder)}"></div>`}).join('');
+ document.querySelectorAll('.remove-link').forEach(btn=>btn.onclick=()=>{const entries=getLinkEntries();const index=Number(btn.dataset.index);if(entries[index])delete data.links[entries[index][0]];renderLinkFields();toast('Link removed — save changes')});
+ document.querySelectorAll('[data-platform-index]').forEach(select=>select.onchange=()=>{const entries=getLinkEntries(),index=Number(select.dataset.platformIndex),oldKey=entries[index]?.[0],url=entries[index]?.[1]||'';const newKey=select.value;if(oldKey&&oldKey!==newKey){delete data.links[oldKey];data.links[newKey]=url}renderLinkFields()});
+}
+$('#addLinkButton').onclick=()=>{let key=Object.keys(platformCatalog).find(id=>!data.links[id]);if(!key)key='website';data.links[key]='';renderLinkFields();const last=fields.querySelector('.link-field:last-child input');last?.focus();toast('New link added')};
 $('#settingsTrigger').onclick=()=>$('#editor').classList.add('open');
 $('#closeEditor').onclick=()=>$('#editor').classList.remove('open');
 document.querySelectorAll('.tab').forEach(tab=>tab.onclick=()=>{document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));tab.classList.add('active');$('#'+tab.dataset.tab+'Panel').classList.add('active')});
 $('#avatarUpload').addEventListener('change',e=>{const file=e.target.files[0];if(!file)return;if(file.size>4*1024*1024){toast('Avatar must be under 4MB');e.target.value='';return}const reader=new FileReader();reader.onload=()=>{data.image=reader.result;$('#avatarPreview').src=reader.result;toast('Avatar ready — save changes')};reader.readAsDataURL(file)});
-$('#saveButton').onclick=()=>{data.name=$('#nameInput').value.trim()||defaults.name;data.bio=$('#bioInput').value.trim()||defaults.bio;document.querySelectorAll('[data-link]').forEach(i=>data.links[i.dataset.link]=i.value.trim());localStorage.setItem('artistLinkHub',JSON.stringify(data));render();$('#editor').classList.remove('open');toast('Profile saved ✨')};
+$('#saveButton').onclick=()=>{data.name=$('#nameInput').value.trim()||defaults.name;data.bio=$('#bioInput').value.trim()||defaults.bio;const nextLinks={};document.querySelectorAll('[data-link-index]').forEach(input=>{const index=Number(input.dataset.linkIndex);const entries=getLinkEntries();const key=entries[index]?.[0];if(key)nextLinks[key]=input.value.trim()});data.links=nextLinks;localStorage.setItem('artistLinkHub',JSON.stringify(data));render();$('#editor').classList.remove('open');toast('Profile saved ✨')};
 $('#resetButton').onclick=()=>{localStorage.removeItem('artistLinkHub');Object.assign(data,JSON.parse(JSON.stringify(defaults)));render();toast('Demo restored')};
 async function copyText(text,msg){try{await navigator.clipboard.writeText(text);toast(msg)}catch{toast('Copy the page URL from your browser')}}
 $('#shareButton').onclick=()=>copyText(location.href,'Profile link copied!');$('#copySlug').onclick=()=>copyText(location.href,'Profile link copied!');
