@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="A cinematic animated link-in-bio page for music artists." />
+  <meta name="description" content="Artist Link Hub — your music, socials and links in one beautiful page." />
   <meta name="theme-color" content="#070709" />
   <title>Artist Link Hub</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -12,62 +12,47 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="ambient ambient-one"></div>
-  <div class="ambient ambient-two"></div>
-  <div class="noise"></div>
-  <div class="cursor-glow"></div>
-  <div class="particles" id="particles" aria-hidden="true"></div>
+  <div class="ambient ambient-one"></div><div class="ambient ambient-two"></div><div class="noise"></div><div class="cursor-glow"></div><div class="particles" id="particles" aria-hidden="true"></div>
 
   <main class="app-shell">
     <section class="phone-frame" aria-label="Artist profile preview">
       <div class="progress-bar" id="progressBar"></div>
-
       <div class="hero">
-        <div class="hero-orbit orbit-one"></div>
-        <div class="hero-orbit orbit-two"></div>
-        <button class="icon-button settings-trigger magnetic" id="settingsTrigger" aria-label="Open profile editor">⚙</button>
+        <div class="hero-orbit orbit-one"></div><div class="hero-orbit orbit-two"></div>
+        <button class="icon-button settings-trigger magnetic" id="settingsTrigger" aria-label="Open creator studio">⚙</button>
         <div class="live-pill"><span></span> MUSIC PROFILE</div>
-
-        <div class="avatar-wrap reveal">
-          <div class="avatar-ring"></div>
-          <img id="profileImage" src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=240&q=85" alt="Artist profile" />
-        </div>
-        <h1 id="artistName" class="reveal">Vine Jonas</h1>
-        <p id="artistBio" class="reveal">Artist • Music • Culture</p>
+        <div class="avatar-wrap reveal"><div class="avatar-ring"></div><img id="profileImage" alt="Artist profile" /></div>
+        <h1 id="artistName" class="reveal"></h1><p id="artistBio" class="reveal"></p>
         <div class="social-row reveal" id="socialRow"></div>
         <div class="scroll-hint"><span></span> Explore links</div>
       </div>
-
       <div class="links" id="linksContainer"></div>
-
-      <footer>
-        <span class="brand-mark">ARTIST <b>LINK</b></span>
-        <button id="shareButton" class="share-link magnetic">Share profile <span>↗</span></button>
-      </footer>
+      <footer><span class="brand-mark">ARTIST <b>LINK</b></span><button id="shareButton" class="share-link magnetic">Share profile <span>↗</span></button></footer>
     </section>
 
-    <aside class="editor" id="editor" aria-label="Profile editor">
-      <div class="editor-header">
-        <div>
-          <span class="eyebrow">CREATOR STUDIO</span>
-          <h2>Build your page</h2>
-          <p>Customize the artist experience.</p>
+    <aside class="editor" id="editor" aria-label="Creator dashboard">
+      <div class="editor-header"><div><span class="eyebrow">CREATOR STUDIO</span><h2>Your artist page</h2><p>Upload your avatar and manage every link.</p></div><button class="icon-button" id="closeEditor" aria-label="Close">×</button></div>
+      <div class="dashboard-tabs"><button class="tab active" data-tab="profile">Profile</button><button class="tab" data-tab="links">Links</button></div>
+
+      <div class="tab-panel active" id="profilePanel">
+        <div class="avatar-uploader">
+          <div class="mini-avatar"><img id="avatarPreview" alt="Avatar preview" /></div>
+          <div><strong>Profile photo</strong><small>JPG, PNG or WebP · stored in this browser</small><label class="upload-button">Upload avatar<input id="avatarUpload" type="file" accept="image/png,image/jpeg,image/webp" hidden /></label></div>
         </div>
-        <button class="icon-button" id="closeEditor" aria-label="Close editor">×</button>
+        <label>Artist name<input id="nameInput" type="text" maxlength="40" placeholder="Your artist name" /></label>
+        <label>Bio<input id="bioInput" type="text" maxlength="90" placeholder="Artist • Music • Culture" /></label>
       </div>
 
-      <label>Artist name<input id="nameInput" type="text" maxlength="40" value="Vine Jonas" /></label>
-      <label>Bio<input id="bioInput" type="text" maxlength="90" value="Artist • Music • Culture" /></label>
-      <label>Profile image URL<input id="imageInput" type="url" value="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=240&q=85" /></label>
+      <div class="tab-panel" id="linksPanel">
+        <div class="section-title">Your platforms</div><p class="panel-note">Paste the public URL for each platform. Empty links stay hidden.</p><div id="linkFields"></div>
+      </div>
 
-      <div class="section-title">Your links</div>
-      <div id="linkFields"></div>
-      <button class="primary-button magnetic" id="saveButton">Save profile <span>→</span></button>
+      <button class="primary-button magnetic" id="saveButton">Save changes <span>→</span></button>
       <button class="secondary-button" id="resetButton">Reset demo</button>
-      <p class="editor-note">Your profile is saved in this browser. Connect a database later to make profiles shareable across devices.</p>
+      <div class="publish-box"><span class="publish-dot"></span><div><strong>Page preview</strong><small id="pageSlug">artist-link-hub</small></div><button id="copySlug">Copy</button></div>
+      <p class="editor-note">This MVP stores your profile in your browser. A future backend can add accounts, permanent public URLs, cloud image storage and analytics.</p>
     </aside>
   </main>
-
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script src="script.js"></script>
 </body>
