@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="A beautiful link-in-bio page for music artists." />
+  <title>Artist Link Hub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="app-shell">
+    <section class="phone-frame" aria-label="Artist profile preview">
+      <div class="hero">
+        <button class="icon-button settings-trigger" id="settingsTrigger" aria-label="Open profile editor">⚙</button>
+        <div class="avatar-wrap">
+          <img id="profileImage" src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=240&q=85" alt="Artist profile" />
+        </div>
+        <h1 id="artistName">Vine Jonas</h1>
+        <p id="artistBio">Artist • Music • Culture</p>
+        <div class="social-row" id="socialRow"></div>
+      </div>
+
+      <div class="links" id="linksContainer"></div>
+
+      <footer>
+        <span>Artist Link Hub</span>
+        <button id="shareButton" class="share-link">Share profile</button>
+      </footer>
+    </section>
+
+    <aside class="editor" id="editor" aria-label="Profile editor">
+      <div class="editor-header">
+        <div>
+          <span class="eyebrow">CREATOR STUDIO</span>
+          <h2>Build your page</h2>
+        </div>
+        <button class="icon-button" id="closeEditor" aria-label="Close editor">×</button>
+      </div>
+
+      <label>Artist name<input id="nameInput" type="text" maxlength="40" value="Vine Jonas" /></label>
+      <label>Bio<input id="bioInput" type="text" maxlength="90" value="Artist • Music • Culture" /></label>
+      <label>Profile image URL<input id="imageInput" type="url" value="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=240&q=85" /></label>
+
+      <div class="section-title">Your links</div>
+      <div id="linkFields"></div>
+      <button class="primary-button" id="saveButton">Save profile</button>
+      <button class="secondary-button" id="resetButton">Reset demo</button>
+      <p class="editor-note">Your profile is saved in this browser. Connect a database later to make profiles shareable across devices.</p>
+    </aside>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="script.js"></script>
+</body>
+</html>
