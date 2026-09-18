@@ -16,9 +16,10 @@ const platformCatalog={
  website:{label:'Website',icon:'↗',placeholder:'https://yourwebsite.com/...'},
  whatsapp:{label:'WhatsApp',icon:'WA',placeholder:'https://wa.me/...'}
 };
-const defaults={name:'Vine Jonas',bio:'Artist • Music • Culture',image:'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=240&q=85',links:{spotify:'https://open.spotify.com/',apple:'https://music.apple.com/',youtube:'https://youtube.com/',audiomack:'https://audiomack.com/',tiktok:'https://tiktok.com/',instagram:'https://instagram.com/'}};
+const defaults={name:'Vine Jonas',bio:'Independent music artist • New music & links',image:'https://raw.githubusercontent.com/JMH-over/Artists-link-tree/main/assets/vine-jonas-avatar.webp',links:{spotify:'https://open.spotify.com/artist/2gL6H8h3Et6TWgJbYkosM?si=zvHJu3ecREGL58T9fJdC2A',apple:'https://music.apple.com/us/artist/vine-jonas/1879792254',audiomack:'https://audiomack.com/vinejns',tidal:'https://tidal.com/artist/23165351/u',deezer:'https://www.deezer.com/artist/120727252',amazon:'https://music.amazon.com/artists/B08TLH4Z55?ref=dm_ff_amazonmusic_3p',youtube:'https://youtube.com/channel/UCHYa50_gQDoEmUu8WmQ2fNQ?si=djYmE0o4huvyXeNm'}};
 const fields=document.querySelector('#linkFields');
-const saved=localStorage.getItem('artistLinkHub');
+const STORAGE_KEY='artistLinkHub:vine-jonas';
+const saved=localStorage.getItem(STORAGE_KEY);
 const raw=saved?JSON.parse(saved):JSON.parse(JSON.stringify(defaults));
 const data={...raw,links:{...raw.links}};
 const $=s=>document.querySelector(s);
@@ -47,8 +48,8 @@ $('#settingsTrigger').onclick=()=>$('#editor').classList.add('open');
 $('#closeEditor').onclick=()=>$('#editor').classList.remove('open');
 document.querySelectorAll('.tab').forEach(tab=>tab.onclick=()=>{document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));tab.classList.add('active');$('#'+tab.dataset.tab+'Panel').classList.add('active')});
 $('#avatarUpload').addEventListener('change',e=>{const file=e.target.files[0];if(!file)return;if(file.size>4*1024*1024){toast('Avatar must be under 4MB');e.target.value='';return}const reader=new FileReader();reader.onload=()=>{data.image=reader.result;$('#avatarPreview').src=reader.result;toast('Avatar ready — save changes')};reader.readAsDataURL(file)});
-$('#saveButton').onclick=()=>{data.name=$('#nameInput').value.trim()||defaults.name;data.bio=$('#bioInput').value.trim()||defaults.bio;const nextLinks={};document.querySelectorAll('[data-link-index]').forEach(input=>{const index=Number(input.dataset.linkIndex);const entries=getEditorEntries();const key=entries[index]?.[0];if(key)nextLinks[key]=input.value.trim()});data.links=nextLinks;localStorage.setItem('artistLinkHub',JSON.stringify(data));render();$('#editor').classList.remove('open');toast('Profile saved ✨')};
-$('#resetButton').onclick=()=>{localStorage.removeItem('artistLinkHub');Object.assign(data,JSON.parse(JSON.stringify(defaults)));render();toast('Demo restored')};
+$('#saveButton').onclick=()=>{data.name=$('#nameInput').value.trim()||defaults.name;data.bio=$('#bioInput').value.trim()||defaults.bio;const nextLinks={};document.querySelectorAll('[data-link-index]').forEach(input=>{const index=Number(input.dataset.linkIndex);const entries=getEditorEntries();const key=entries[index]?.[0];if(key)nextLinks[key]=input.value.trim()});data.links=nextLinks;localStorage.setItem(STORAGE_KEY,JSON.stringify(data));render();$('#editor').classList.remove('open');toast('Profile saved ✨')};
+$('#resetButton').onclick=()=>{localStorage.removeItem(STORAGE_KEY);Object.assign(data,JSON.parse(JSON.stringify(defaults)));render();toast('Demo restored')};
 async function copyText(text,msg){try{await navigator.clipboard.writeText(text);toast(msg)}catch{toast('Copy the page URL from your browser')}}
 $('#shareButton').onclick=()=>copyText(location.href,'Profile link copied!');$('#copySlug').onclick=()=>copyText(location.href,'Profile link copied!');
 function addCardEffects(){document.querySelectorAll('.link-card').forEach(card=>{card.onpointermove=e=>{const r=card.getBoundingClientRect(),x=(e.clientX-r.left)/r.width-.5,y=(e.clientY-r.top)/r.height-.5;card.style.transform=`perspective(700px) rotateX(${y*-3}deg) rotateY(${x*4}deg) translateY(-4px) scale(1.012)`};card.onpointerleave=()=>card.style.transform=''})}
