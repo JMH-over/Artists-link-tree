@@ -16,7 +16,7 @@ const platformCatalog={
  website:{label:'Website',icon:'↗',placeholder:'https://yourwebsite.com/...'},
  whatsapp:{label:'WhatsApp',icon:'WA',placeholder:'https://wa.me/...'}
 };
-const defaults={name:'Vine Jonas',bio:'Independent music artist • New music & links',image:'https://raw.githubusercontent.com/JMH-over/Artists-link-tree/main/assets/vine-jonas-avatar.webp',links:{spotify:'https://open.spotify.com/artist/2gL6H8h3Et6TlWgJbYkosM',apple:'https://music.apple.com/us/artist/vine-jonas/1879792254',audiomack:'https://audiomack.com/vinejonas',tidal:'https://tidal.com/artist/23165351/u',deezer:'https://www.deezer.com/artist/120727252',amazon:'https://music.amazon.com/artists/B08TLH4Z55?ref=dm_ff_amazonmusic_3p',youtube:'https://youtube.com/channel/UCHYa50_gQDoEmUu8WmQ2fNQ?si=djYmE0o4huvyXeNm'}};
+const defaults={name:'Vine Jonas',bio:'Independent music artist • New music & links',image:'assets/vine-jonas-avatar.webp',links:{spotify:'https://open.spotify.com/artist/2gL6H8h3Et6TlWgJbYkosM',apple:'https://music.apple.com/us/artist/vine-jonas/1879792254',audiomack:'https://audiomack.com/vinejonas',tidal:'https://tidal.com/artist/23165351/u',deezer:'https://www.deezer.com/artist/120727252',amazon:'https://music.amazon.com/artists/B08TLH4Z55?ref=dm_ff_amazonmusic_3p',youtube:'https://youtube.com/channel/UCHYa50_gQDoEmUu8WmQ2fNQ?si=djYmE0o4huvyXeNm'}};
 const fields=document.querySelector('#linkFields');
 const STORAGE_KEY='artistLinkHub:vine-jonas';
 const saved=localStorage.getItem(STORAGE_KEY);
@@ -25,6 +25,7 @@ const data={...raw,links:{...raw.links}};
 // Correct legacy Vine Jonas links saved before the latest Spotify profile URL update.
 if(data.links.spotify?.includes('open.spotify.com/artist/2gL6H8h3Et6TWgJbYkosM')) data.links.spotify='https://open.spotify.com/artist/2gL6H8h3Et6TlWgJbYkosM';
 if(data.links.audiomack==='https://audiomack.com/vinejns') data.links.audiomack='https://audiomack.com/vinejonas';
+if(data.image==='https://raw.githubusercontent.com/JMH-over/Artists-link-tree/main/assets/vine-jonas-avatar.webp') data.image='assets/vine-jonas-avatar.webp';
 localStorage.setItem(STORAGE_KEY,JSON.stringify(data));
 const $=s=>document.querySelector(s);
 function safeUrl(value){try{const u=new URL(value);return ['http:','https:'].includes(u.protocol)?u.href:'#'}catch{return '#'}}
