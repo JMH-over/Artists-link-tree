@@ -22,13 +22,17 @@ const STORAGE_KEY='artistLinkHub:vine-jonas';
 const saved=localStorage.getItem(STORAGE_KEY);
 const raw=saved?JSON.parse(saved):JSON.parse(JSON.stringify(defaults));
 const data={...raw,links:{...raw.links}};
-// Correct legacy Vine Jonas links saved before the latest Spotify profile URL update.
 if(data.links.spotify?.includes('open.spotify.com/artist/2gL6H8h3Et6TWgJbYkosM')) data.links.spotify='https://open.spotify.com/artist/2gL6H8h3Et6TlWgJbYkosM';
 if(data.links.audiomack==='https://audiomack.com/vinejns') data.links.audiomack='https://audiomack.com/vinejonas';
 if(data.image==='https://raw.githubusercontent.com/JMH-over/Artists-link-tree/main/assets/vine-jonas-avatar.webp') data.image='assets/vine-jonas-avatar.webp';
 localStorage.setItem(STORAGE_KEY,JSON.stringify(data));
 const $=s=>document.querySelector(s);
-function safeUrl(value){try{const u=new URL(value);return ['http:','https:'].includes(u.protocol)?u.href:'#'}catch{return '#'}}
+function safeUrl(value){
+ try{
+  const u=new URL(value,location.href);
+  return ['http:','https:'].includes(u.protocol)?u.href:'#';
+ }catch{return '#'}
+}
 function escapeHtml(v){return String(v).replaceAll('&','&amp;').replaceAll('"','&quot;').replaceAll('<','&lt;').replaceAll('>','&gt;')}
 function makeSlug(name){return (name||'artist').toLowerCase().trim().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')||'artist'}
 function toast(msg){const t=$('#toast');t.textContent=msg;t.classList.add('show');clearTimeout(window.toastTimer);window.toastTimer=setTimeout(()=>t.classList.remove('show'),1800)}
@@ -46,14 +50,36 @@ function render(){
 function renderLinkFields(){
  fields.innerHTML=getEditorEntries().map(([key,url],index)=>{const p=platformCatalog[key]||{label:key,icon:'↗',placeholder:'https://...'};return `<div class="link-field"><div class="link-field-head"><small>${escapeHtml(p.label)}</small><button type="button" class="remove-link" data-index="${index}" aria-label="Remove ${escapeHtml(p.label)}">Remove</button></div><select data-platform-index="${index}">${Object.entries(platformCatalog).map(([id,item])=>`<option value="${id}" ${id===key?'selected':''}>${escapeHtml(item.label)}</option>`).join('')}</select><input data-link-index="${index}" type="url" value="${escapeHtml(url)}" placeholder="${escapeHtml(p.placeholder)}"></div>`}).join('');
  document.querySelectorAll('.remove-link').forEach(btn=>btn.onclick=()=>{const entries=getEditorEntries();const index=Number(btn.dataset.index);if(entries[index])delete data.links[entries[index][0]];renderLinkFields();toast('Link removed — save changes')});
- document.querySelectorAll('[data-platform-index]').forEach(select=>select.onchange=()=>{const entries=getEditorEntries(),index=Number(select.dataset.platformIndex),oldKey=entries[index]?.[0],url=entries[index]?.[1]||'';const newKey=select.value;if(oldKey&&oldKey!==newKey){delete data.links[oldKey];data.links[newKey]=url}renderLinkFields()});
+ document.querySelectorAll('[data-platform-index]').forEach(select=>select.onchange=()=>{const entries=getEditorEntries(),index=Number(select.dataset.platformIndex),oldKey=entries[index]?.[0],url=entries[index]?.[1]||'',newKey=select.value;if(oldKey&&oldKey!==newKey){delete data.links[oldKey];data.links[newKey]=url}renderLinkFields()});
 }
 $('#addLinkButton').onclick=()=>{let key=Object.keys(platformCatalog).find(id=>!Object.prototype.hasOwnProperty.call(data.links,id));if(!key)key='website';let suffix=1;while(Object.prototype.hasOwnProperty.call(data.links,key)){key=`website-${suffix++}`}data.links[key]='';renderLinkFields();const last=fields.querySelector('.link-field:last-child input');last?.focus();toast('New link added')};
 $('#settingsTrigger').onclick=()=>$('#editor').classList.add('open');
 $('#closeEditor').onclick=()=>$('#editor').classList.remove('open');
 document.querySelectorAll('.tab').forEach(tab=>tab.onclick=()=>{document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));tab.classList.add('active');$('#'+tab.dataset.tab+'Panel').classList.add('active')});
-$('#avatarUpload').addEventListener('change',e=>{const file=e.target.files[0];if(!file)return;if(file.size>4*1024*1024){toast('Avatar must be under 4MB');e.target.value='';return}const reader=new FileReader();reader.onload=()=>{data.image=reader.result;$('#avatarPreview').src=reader.result;toast('Avatar ready — save changes')};reader.readAsDataURL(file)});
-$('#saveButton').onclick=()=>{data.name=$('#nameInput').value.trim()||defaults.name;data.bio=$('#bioInput').value.trim()||defaults.bio;const nextLinks={};document.querySelectorAll('[data-link-index]').forEach(input=>{const index=Number(input.dataset.linkIndex);const entries=getEditorEntries();const key=entries[index]?.[0];if(key)nextLinks[key]=input.value.trim()});data.links=nextLinks;localStorage.setItem(STORAGE_KEY,JSON.stringify(data));render();$('#editor').classList.remove('open');toast('Profile saved ✨')};
+$('#avatarUpload').addEventListener('change',e=>{
+ const file=e.target.files[0];
+ if(!file)return;
+ if(file.size>12*1024*1024){toast('Please choose an image under 12MB');e.target.value='';return}
+ const reader=new FileReader();
+ reader.onload=()=>{
+  const img=new Image();
+  img.onload=()=>{
+   const max=512,scale=Math.min(1,max/Math.max(img.naturalWidth,img.naturalHeight));
+   const canvas=document.createElement('canvas');
+   canvas.width=Math.max(1,Math.round(img.naturalWidth*scale));
+   canvas.height=Math.max(1,Math.round(img.naturalHeight*scale));
+   const ctx=canvas.getContext('2d');
+   ctx.drawImage(img,0,0,canvas.width,canvas.height);
+   data.image=canvas.toDataURL('image/jpeg',0.82);
+   $('#avatarPreview').src=data.image;
+   toast('Avatar ready — save changes');
+  };
+  img.onerror=()=>toast('Could not read that image');
+  img.src=reader.result;
+ };
+ reader.readAsDataURL(file);
+});
+$('#saveButton').onclick=()=>{data.name=$('#nameInput').value.trim()||defaults.name;data.bio=$('#bioInput').value.trim()||defaults.bio;const nextLinks={};document.querySelectorAll('[data-link-index]').forEach(input=>{const index=Number(input.dataset.linkIndex);const entries=getEditorEntries();const key=entries[index]?.[0];if(key)nextLinks[key]=input.value.trim()});data.links=nextLinks;try{localStorage.setItem(STORAGE_KEY,JSON.stringify(data));render();$('#editor').classList.remove('open');toast('Profile saved ✨')}catch(err){toast('Avatar is too large to save — choose another image')}};
 $('#resetButton').onclick=()=>{localStorage.removeItem(STORAGE_KEY);Object.assign(data,JSON.parse(JSON.stringify(defaults)));render();toast('Demo restored')};
 async function copyText(text,msg){try{await navigator.clipboard.writeText(text);toast(msg)}catch{toast('Copy the page URL from your browser')}}
 $('#shareButton').onclick=()=>copyText(location.href,'Profile link copied!');$('#copySlug').onclick=()=>copyText(location.href,'Profile link copied!');
